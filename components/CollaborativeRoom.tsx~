@@ -1,0 +1,8 @@
+import React from 'react'
+
+const CollaborativeRoom = () => {
+    return (
+        <div>CollaborativeRoom</div>
+    )
+}
+export default CollaborativeRoom

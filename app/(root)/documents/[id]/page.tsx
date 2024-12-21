@@ -1,11 +1,13 @@
 import React from 'react'
-import {Editor} from "@/components/editor/Editor";
+import CollaborativeRoom from "@/components/CollaborativeRoom";
+
+
 
 const Document = () => {
     return (
-        <div>
-            <Editor/>
-        </div>
+        <main className={"w-full flex flex-col items-center"}>
+            <CollaborativeRoom/>
+        </main>
     )
 }
 export default Document
