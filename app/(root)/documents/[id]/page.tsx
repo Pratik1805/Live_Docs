@@ -24,7 +24,7 @@ const Document = async ({ params: {id} }: SearchParamProps) => {
         <main className={"w-full flex flex-col items-center"}>
             <CollaborativeRoom
                 roomId = {id}
-                roomMetaData = {room.metadata}
+                roomMetadata = {room.metadata}
             />
         </main>
     )
