@@ -1,32 +1,49 @@
-import React from 'react'
 import CollaborativeRoom from "@/components/CollaborativeRoom";
-import {currentUser} from "@clerk/nextjs/server";
-import {redirect} from "next/navigation";
-import {getDocument} from "@/lib/actions/room.actions";
+import { getDocument } from "@/lib/actions/room.actions";
+import { getClerkUsers } from "@/lib/actions/user.actions";
+import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
+const Document = async ({ params: { id } }: SearchParamProps) => {
+  const clerkUser = await currentUser();
+  if (!clerkUser) redirect("/sign-in");
 
+  const room = await getDocument({
+    roomId: id,
+    userId: clerkUser.emailAddresses[0].emailAddress,
+  });
 
-const Document = async ({ params: {id} }: SearchParamProps) => {
+  if (!room || !room.usersAccesses) {
+    console.error("Invalid room data:", room);
+    redirect("/");
+  }
 
-    const clerkUser = await currentUser();
+  const userIds = Object.keys(room.usersAccesses || {});
+  const users = await getClerkUsers({ userIds });
 
-    if(!clerkUser) redirect('/sign-in');
+  const usersData = users.map((user: User) => ({
+    ...user,
+    userType: room.usersAccesses[user.email]?.includes("room:write")
+      ? "editor"
+      : "viewer",
+  }));
 
-    const room = await getDocument({
-        roomId: id,
-        userId: clerkUser.emailAddresses[0].emailAddress,
-    })
+  const currentUserType = room.usersAccesses[
+    clerkUser.emailAddresses[0].emailAddress
+  ]?.includes("room:write")
+    ? "editor"
+    : "viewer";
 
-    if(!room) redirect('/');
+  return (
+    <main className="flex w-full flex-col items-center">
+      <CollaborativeRoom
+        roomId={id}
+        roomMetadata={room.metadata}
+        users={usersData}
+        currentUserType={currentUserType}
+      />
+    </main>
+  );
+};
 
-    //TODO: Assess the permissions of the user to access documents
-    return (
-        <main className={"w-full flex flex-col items-center"}>
-            <CollaborativeRoom
-                roomId = {id}
-                roomMetadata = {room.metadata}
-            />
-        </main>
-    )
-}
-export default Document
+export default Document;
